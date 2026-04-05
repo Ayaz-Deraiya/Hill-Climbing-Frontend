@@ -6,7 +6,7 @@ import {
 import { Play, RotateCcw, BarChart3, Box, Settings2, Info, FileText } from 'lucide-react';
 
 // API Configuration
-const API_BASE_URL = 'https://hill-climbing-backend-1.onrender.com';
+const API_BASE_URL = 'http://localhost:8000';
 
 interface Bin {
   items: number[];
@@ -17,9 +17,9 @@ interface Bin {
 interface OptimizationResult {
   algorithm: string;
   bins: Bin[];
-  cost_history: number[];
+  history: number[];
   num_bins: number;
-  final_cost: number;
+  optimal_bins?: number;
 }
 
 interface TestCaseResult {
@@ -44,6 +44,7 @@ const App: React.FC = () => {
   const [itemsStr, setItemsStr] = useState('5, 8, 3, 2, 6, 9, 4, 1, 7, 5, 2, 8, 4, 3, 6, 9');
   const [capacity, setCapacity] = useState(10);
   const [maxIter, setMaxIter] = useState(500);
+  const [verifyOptimal, setVerifyOptimal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<OptimizationResult | null>(null);
   const [appMode, setAppMode] = useState<'single' | 'batch'>('single');
@@ -70,7 +71,8 @@ const App: React.FC = () => {
         items,
         capacity,
         algorithm: 'hc',
-        max_iter: maxIter
+        max_iter: maxIter,
+        verify_optimal: verifyOptimal
       });
       setResult(resp.data);
     } catch (err) {
@@ -135,18 +137,20 @@ const App: React.FC = () => {
         <div className="stat-label">Bins Used</div>
       </div>
       <div className="stat-card">
-        <div className="stat-value">{res.final_cost.toFixed(2)}</div>
-        <div className="stat-label">Final Cost</div>
-      </div>
-      <div className="stat-card">
-        <div className="stat-value">{res.cost_history.length}</div>
+        <div className="stat-value">{res.history.length}</div>
         <div className="stat-label">Iterations</div>
       </div>
+      {res.optimal_bins !== undefined && res.optimal_bins !== null && (
+        <div className="stat-card">
+          <div className="stat-value">{res.optimal_bins}</div>
+          <div className="stat-label">Optimal Bins (BT)</div>
+        </div>
+      )}
     </div>
   );
 
   const renderChart = (history: number[]) => {
-    const data = history.map((val, i) => ({ iteration: i, cost: val }));
+    const data = history.map((val, i) => ({ iteration: i, bins: val }));
     // Downsample chart data for performance if history is long
     const sampledData = data.filter((_, i) => i % Math.max(1, Math.floor(data.length / 100)) === 0);
 
@@ -156,15 +160,15 @@ const App: React.FC = () => {
           <LineChart data={sampledData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis dataKey="iteration" stroke="#64748b" label={{ value: 'Iterations', position: 'bottom', offset: 0, fill: '#64748b' }} height={50} />
-            <YAxis stroke="#64748b" label={{ value: 'Cost', angle: -90, position: 'insideLeft', offset: 10, fill: '#64748b' }} width={60} />
+            <YAxis stroke="#64748b" label={{ value: 'Number of Bins', angle: -90, position: 'insideLeft', offset: 10, fill: '#64748b' }} width={60} />
             <Tooltip 
               contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
               itemStyle={{ color: '#4f46e5' }}
             />
             <Line 
-              type="monotone" 
-              dataKey="cost" 
-              name="Cost" 
+              type="stepAfter" 
+              dataKey="bins" 
+              name="Bins Used" 
               stroke="#4f46e5" 
               strokeWidth={2} 
               dot={false} 
@@ -287,6 +291,17 @@ const App: React.FC = () => {
                 />
               </div>
 
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input 
+                  type="checkbox" 
+                  id="verifyOpt"
+                  checked={verifyOptimal} 
+                  onChange={(e) => setVerifyOptimal(e.target.checked)}
+                  style={{ width: 'auto', cursor: 'pointer' }}
+                />
+                <label htmlFor="verifyOpt" style={{ marginBottom: 0, cursor: 'pointer' }}>Verify with Optimal Answer</label>
+              </div>
+
               <button 
                 className="btn btn-primary" 
                 onClick={runOptimization}
@@ -354,9 +369,9 @@ const App: React.FC = () => {
                 <div className="card">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#818cf8' }}>
                     <BarChart3 size={20} />
-                    <h2 style={{ fontSize: '1.25rem' }}>Cost History</h2>
+                    <h2 style={{ fontSize: '1.25rem' }}>Bin Count History</h2>
                   </div>
-                  {renderChart(result.cost_history)}
+                  {renderChart(result.history)}
                 </div>
               </>
             ) : (

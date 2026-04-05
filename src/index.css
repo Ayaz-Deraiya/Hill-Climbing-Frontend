@@ -191,13 +191,14 @@ input:focus, select:focus, textarea:focus {
 }
 
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  justify-content: center;
   gap: 1rem;
   margin-top: 1rem;
 }
 
 .stat-card {
+  flex: 1;
   background-color: var(--bg);
   padding: 1rem;
   border-radius: 0.75rem;
