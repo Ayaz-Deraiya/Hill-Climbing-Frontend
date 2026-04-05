@@ -6,7 +6,7 @@ import {
 import { Play, RotateCcw, BarChart3, Box, Settings2, Info, FileText } from 'lucide-react';
 
 // API Configuration
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://hill-climbing-backend-1.onrender.com';
 
 interface Bin {
   items: number[];
