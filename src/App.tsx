@@ -239,7 +239,7 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <header>
-        <h1>Bin Packing AI</h1>
+        <h1>Bin Packing</h1>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem' }}>
            <button className={`btn ${appMode === 'single' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAppMode('single')} style={{ width: 'auto', padding: '0.5rem 1.5rem', marginTop: 0 }}>Single Optimization</button>
            <button className={`btn ${appMode === 'batch' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAppMode('batch')} style={{ width: 'auto', padding: '0.5rem 1.5rem', marginTop: 0 }}>Batch Comparison</button>
